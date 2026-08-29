@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B2027">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>תהילה לדוד | לוח בקרה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&family=Rubik:wght@300;400;500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B2027; --panel:#123039; --panel-2:#163944; --line:#21474f;
+    --cyan:#3FC1C9; --cyan-dim:#2a8f95; --brass:#C98F4E; --brass-dim:#9c6c37;
+    --text:#EAF4F4; --text-dim:#9fc0c3; --danger:#E2574C; --good:#6FCF97; --radius:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:radial-gradient(1200px 600px at 20% -10%, #123a42 0%, transparent 60%),var(--bg);color:var(--text);font-family:'Rubik',sans-serif;min-height:100vh;padding-bottom:calc(40px + env(safe-area-inset-bottom));}
+  header.top{padding:calc(18px + env(safe-area-inset-top)) 18px 10px;text-align:center;}
+  header.top .brand{font-family:'Heebo',sans-serif;font-weight:800;font-size:22px;letter-spacing:0.5px;}
+  header.top .brand span{color:var(--brass);}
+  header.top .sub{font-size:12px;color:var(--text-dim);margin-top:2px;letter-spacing:1px;}
+
+  .gauge-strip{display:flex;gap:10px;overflow-x:auto;padding:14px 14px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .gauge-strip::-webkit-scrollbar{display:none;}
+  .gauge-card{flex:0 0 auto;background:linear-gradient(160deg, var(--panel-2), var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px 8px;min-width:112px;text-align:center;position:relative;}
+  .gauge-card::before,.gauge-card::after{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:#0a1e23;box-shadow: inset 0 0 0 1px #2c5560;top:6px;}
+  .gauge-card::before{right:6px;} .gauge-card::after{left:6px;}
+  .gauge-label{font-size:10.5px;color:var(--text-dim);margin-top:2px;}
+  .gauge-value{font-family:'Roboto Mono', monospace;font-size:19px;font-weight:700;color:var(--cyan);}
+  .gauge-value.alert{color:var(--danger);}
+  .gauge-value.brass{color:var(--brass);}
+
+  nav.tabs{display:flex;gap:6px;padding:14px 14px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  nav.tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--text-dim);padding:9px 15px;border-radius:20px;font-family:'Rubik',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;}
+  .tab-btn.active{background:var(--cyan);color:#062024;border-color:var(--cyan);font-weight:700;}
+
+  main{padding:12px 14px 20px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .panel h2{font-family:'Heebo',sans-serif;font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+  .panel h2::before{content:'';width:8px;height:8px;border-radius:2px;background:var(--brass);display:inline-block;transform:rotate(45deg);}
+
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  input, select, textarea{background:#0d262c;border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:8px;font-family:'Rubik',sans-serif;font-size:16px;flex:1;min-width:120px;}
+  textarea{width:100%;min-height:50px;resize:vertical;}
+  input::placeholder{color:#5f8a91;}
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--cyan); outline-offset:1px;}
+  label.check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim);flex:1;min-width:120px;}
+  label.check input{flex:none;width:auto;}
+
+  button{-webkit-appearance:none;appearance:none;}
+  button.action{background:var(--brass);color:#251505;border:none;padding:10px 18px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;}
+  button.action:hover{background:#dba05e;}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--text-dim);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;}
+  button.ghost.danger{color:var(--danger); border-color:#5c2a26;}
+  button.ghost.active-toggle{background:var(--cyan-dim);color:#062024;border-color:var(--cyan-dim);}
+  button.ghost.paid-toggle{color:var(--good);border-color:#1c4a30;}
+  button.ghost.small{padding:5px 8px;font-size:11px;}
+
+  .item{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .item-title{font-weight:700;font-size:14.5px;}
+  .item-meta{font-size:12px;color:var(--text-dim);margin-top:4px;line-height:1.7;}
+  .badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:700;white-space:nowrap;}
+  .badge.open{background:#3a2a12;color:var(--brass);}
+  .badge.progress{background:#123a4a;color:var(--cyan);}
+  .badge.done{background:#173d29;color:var(--good);}
+  .badge.income{background:#173d29;color:var(--good);}
+  .badge.expense{background:#3d1a17;color:var(--danger);}
+  .badge.robot{background:#123a4a;color:var(--cyan);}
+  .badge.norobot{background:#2a2a2a;color:var(--text-dim);}
+  .badge.unpaid{background:#3d1a17;color:var(--danger);}
+  .badge.paid{background:#173d29;color:var(--good);}
+  .badge.low{background:#3d1a17;color:var(--danger);}
+
+  .item-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  select.status-select{padding:5px 8px;font-size:12px;min-width:auto;flex:none;}
+  .empty{text-align:center;color:var(--text-dim);font-size:13px;padding:24px 10px;}
+  .section-hidden{display:none;}
+  .field-label{font-size:11px;color:var(--text-dim);margin-bottom:3px;display:block;}
+  .field-wrap{display:flex;flex-direction:column;flex:1;min-width:120px;}
+
+  .detail-box{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:none;}
+  .detail-box.open{display:block;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .detail-grid .field-wrap{min-width:0;}
+  .detail-grid .full{grid-column:1/-1;}
+  .hist-entry{background:#0d262c;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;}
+  .hist-entry .h-top{display:flex;justify-content:space-between;color:var(--text-dim);}
+  .search-box{margin-bottom:10px;}
+
+  .thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--line);cursor:pointer;}
+  .photo-btns{display:flex;gap:8px;margin-top:6px;}
+  .photo-btns input[type=file]{display:none;}
+  .photo-btn{flex:1;text-align:center;background:#0d262c;border:1px solid var(--line);color:var(--text-dim);padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#0d262c;border:1px solid var(--line);border-radius:20px;padding:5px 10px;font-size:11.5px;margin:3px 4px 0 0;}
+  .chip button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;padding:0;}
+
+  #lightbox{display:none;position:fixed;inset:0;background:#000d;z-index:100;align-items:center;justify-content:center;padding:20px;}
+  #lightbox.show{display:flex;}
+  #lightbox img{max-width:100%;max-height:100%;border-radius:10px;}
+
+  .report-box{white-space:pre-wrap;font-family:'Roboto Mono',monospace;font-size:12px;background:#0d262c;border:1px solid var(--line);border-radius:8px;padding:12px;line-height:1.6;max-height:300px;overflow-y:auto;}
+
+  .stock-adjust{display:flex;align-items:center;gap:6px;}
+  .stock-adjust button{width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:17px;cursor:pointer;}
+  .stock-num{font-family:'Roboto Mono',monospace;font-weight:700;min-width:34px;text-align:center;}
+
+  .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--brass);color:#251505;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity .2s, transform .2s;z-index:200;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .stat-line{font-size:12.5px;color:var(--text-dim);background:#0d262c;border-radius:8px;padding:8px 10px;margin-top:6px;}
+
+  .confirm-overlay{display:none;position:fixed;inset:0;background:#000a;z-index:300;align-items:center;justify-content:center;padding:24px;}
+  .confirm-overlay.show{display:flex;}
+  .confirm-box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;max-width:320px;width:100%;text-align:center;}
+  .confirm-box p{font-size:14px;line-height:1.6;margin:0 0 16px;}
+  .confirm-actions{display:flex;gap:10px;justify-content:center;}
+
+  .toast.error{background:var(--danger);color:#fff;}
+  .calbtn{background:transparent;border:1px solid var(--cyan-dim);color:var(--cyan);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;}
+  .badge.overdue{background:var(--danger);color:#fff;}
+  .badge.today{background:var(--brass);color:#251505;}
+  .badge.tomorrow{background:var(--cyan-dim);color:#062024;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">תהילה <span>לדוד</span> — אחזקה ופרויקטים</div>
+  <div class="sub">לוח בקרה עסקי</div>
+</header>
+
+<div class="gauge-strip" id="gaugeStrip"></div>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="dashboard">לוח בקרה</button>
+  <button class="tab-btn" data-tab="customers">לקוחות</button>
+  <button class="tab-btn" data-tab="oneoff">מזדמנים</button>
+  <button class="tab-btn" data-tab="tasks">משימות ותקלות</button>
+  <button class="tab-btn" data-tab="finance">כספים</button>
+  <button class="tab-btn" data-tab="materials">חומרים</button>
+</nav>
+
+<main>
+
+  <section id="tab-dashboard">
+    <div class="panel" id="urgentPanel">
+      <h2>🔔 תזכורות דחופות (היום ומחר)</h2>
+      <button class="calbtn" id="notifBtn" onclick="requestNotifPermission()">🔔 הפעל התראות בדפדפן</button>
+      <div id="urgentList" style="margin-top:10px;"></div>
+    </div>
+    <div class="panel">
+      <h2>טיפולים קרובים (7 ימים)</h2>
+      <button class="calbtn" onclick="addUpcomingToCalendar()">📅 הוסף הכל ליומן</button>
+      <div id="upcomingList" style="margin-top:10px;"></div>
+    </div>
+    <div class="panel">
+      <h2>💸 מי חייב לי כסף</h2>
+      <div id="owedList"></div>
+    </div>
+    <div class="panel">
+      <h2>משימות פתוחות</h2>
+      <div id="openTasksList"></div>
+    </div>
+  </section>
+
+  <section id="tab-customers" class="section-hidden">
+    <div class="panel">
+      <h2>הוספת לקוח קבוע</h2>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">שם</span><input id="cName" placeholder="שם הלקוח"></div>
+        <div class="field-wrap"><span class="field-label">טלפון</span><input id="cPhone" placeholder="050-0000000"></div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">כתובת</span><input id="cAddress" placeholder="רחוב ומספר"></div>
+        <div class="field-wrap"><span class="field-label">עיר</span><input id="cCity" placeholder="באר שבע / עומר / להבים"></div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">סוג בריכה</span><input id="cPoolType" placeholder="סקימרים / גלישה / PVC..."></div>
+        <div class="field-wrap"><span class="field-label">מחיר טיפול (₪)</span><input id="cPrice" type="number" placeholder="400"></div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">תאריך טיפול הבא</span><input id="cNextDate" type="date"></div>
+        <div class="field-wrap"><span class="field-label">רובוט</span>
+          <select id="cRobot"><option value="לא">לא</option><option value="כן">כן</option></select>
+        </div>
+      </div>
+      <div class="row"><input id="cMaterials" placeholder="חומרים נדרשים (למשל: כלור, מלח, pH מינוס)"></div>
+      <div class="row"><textarea id="cNotes" placeholder="הערות (קודי כניסה, העדפות וכו')"></textarea></div>
+      <button class="action" onclick="addCustomer()">הוסף לקוח</button>
+    </div>
+    <div class="panel">
+      <h2>רשימת לקוחות</h2>
+      <input class="search-box" id="custSearch" placeholder="🔎 חיפוש שם, עיר או כתובת" oninput="renderCustomers()">
+      <div class="row" style="margin-bottom:10px;">
+        <div class="field-wrap">
+          <span class="field-label">מיון</span>
+          <select id="custSort" onchange="renderCustomers()">
+            <option value="name">שם (א-ת)</option>
+            <option value="city">עיר</option>
+            <option value="next">טיפול הבא (קרוב ביותר)</option>
+          </select>
+        </div>
+      </div>
+      <div id="customerList"></div>
+    </div>
+  </section>
+
+  <section id="tab-oneoff" class="section-hidden">
+    <div class="panel">
+      <h2>⚡ לקוח מזדמן / עבודה חד-פעמית</h2>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">שם</span><input id="oName" placeholder="שם הלקוח"></div>
+        <div class="field-wrap"><span class="field-label">טלפון</span><input id="oPhone" placeholder="050-0000000"></div>
+      </div>
+      <div class="row"><input id="oAddress" placeholder="כתובת (לא חובה)"></div>
+      <div class="row"><textarea id="oDesc" placeholder="תיאור העבודה / התקלה"></textarea></div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">תאריך</span><input id="oDate" type="date"></div>
+        <div class="field-wrap"><span class="field-label">סכום עבודה (₪)</span><input id="oAmount" type="number" placeholder="0"></div>
+      </div>
+      <div class="row"><label class="check"><input type="checkbox" id="oPaid" checked> שולם</label></div>
+
+      <div class="row" style="margin-top:6px;">
+        <div class="field-wrap"><span class="field-label">🧪 חומר בשימוש</span><select id="matSel_oneoff_new"></select></div>
+        <div class="field-wrap" style="max-width:90px;"><span class="field-label">כמות</span><input type="number" id="matQty_oneoff_new" placeholder="1"></div>
+      </div>
+      <button class="ghost" onclick="addMaterialUse('oneoff_new')">➕ הוסף חומר לעבודה</button>
+      <div id="matChips_oneoff_new"></div>
+
+      <div class="photo-btns">
+        <label class="photo-btn">📷 צלם תמונה<input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event,'oneoff_new')"></label>
+        <label class="photo-btn">🖼 מהגלריה<input type="file" accept="image/*" multiple onchange="handlePhotoSelect(event,'oneoff_new')"></label>
+      </div>
+      <div class="thumbs" id="thumbs_oneoff_new"></div>
+      <button class="action" style="margin-top:10px;" onclick="addOneOff()">➕ הוסף עבודה</button>
+    </div>
+    <div class="panel">
+      <h2>עבודות מזדמנות</h2>
+      <div id="oneoffList"></div>
+    </div>
+  </section>
+
+  <section id="tab-tasks" class="section-hidden">
+    <div class="panel">
+      <h2>הוספת משימה / תקלה</h2>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">לקוח (לא חובה)</span><select id="tCustomer"><option value="">— ללא לקוח (תזכורת אישית) —</option></select></div>
+        <div class="field-wrap"><span class="field-label">סוג</span>
+          <select id="tType">
+            <option value="תחזוקה מונעת">תחזוקה מונעת</option>
+            <option value="תקלה">תקלה</option>
+            <option value="הנדימן">הנדימן</option>
+            <option value="תזכורת">תזכורת אישית</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">תאריך</span><input id="tDate" type="date"></div>
+        <div class="field-wrap"><span class="field-label">שעה (לא חובה)</span><input id="tTime" type="time"></div>
+      </div>
+      <div class="row"><textarea id="tDesc" placeholder="תיאור המשימה / התקלה / התזכורת"></textarea></div>
+      <button class="action" onclick="addTask()">הוסף משימה</button>
+    </div>
+    <div class="panel">
+      <h2>כל המשימות</h2>
+      <div id="taskList"></div>
+    </div>
+  </section>
+
+  <section id="tab-finance" class="section-hidden">
+    <div class="panel">
+      <h2>הוספת תנועה כספית</h2>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">סוג</span>
+          <select id="fType">
+            <option value="הכנסה">הכנסה</option>
+            <option value="הוצאה">הוצאה</option>
+          </select>
+        </div>
+        <div class="field-wrap"><span class="field-label">סכום (₪)</span><input id="fAmount" type="number" placeholder="0"></div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">תאריך</span><input id="fDate" type="date"></div>
+        <div class="field-wrap"><span class="field-label">לקוח (לא חובה)</span><select id="fCustomer"><option value="">— ללא —</option></select></div>
+      </div>
+      <div class="row"><input id="fDesc" placeholder="תיאור (למשל: ניקוי מסננים, רכישת כלור)"></div>
+      <div class="row"><label class="check"><input type="checkbox" id="fPaid" checked> שולם</label></div>
+      <button class="action" onclick="addFinance()">הוסף תנועה</button>
+    </div>
+    <div class="panel">
+      <h2>סיכום החודש</h2>
+      <div id="financeSummary"></div>
+    </div>
+    <div class="panel">
+      <h2>📄 דוח חודשי</h2>
+      <button class="action" onclick="buildMonthlyReport()">צור דוח חודשי</button>
+      <div style="margin-top:10px;" id="reportWrap"></div>
+    </div>
+    <div class="panel">
+      <h2>כל התנועות</h2>
+      <div id="financeList"></div>
+    </div>
+  </section>
+
+  <section id="tab-materials" class="section-hidden">
+    <div class="panel">
+      <h2>הוספת חומר</h2>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">שם החומר</span><input id="mName" placeholder="כלור טבליות"></div>
+        <div class="field-wrap"><span class="field-label">יחידה</span><input id="mUnit" placeholder="דלי / שק / ליטר"></div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">מלאי נוכחי</span><input id="mStock" type="number" placeholder="0"></div>
+        <div class="field-wrap"><span class="field-label">סף התראה</span><input id="mMin" type="number" placeholder="2"></div>
+      </div>
+      <div class="row">
+        <div class="field-wrap"><span class="field-label">מחיר קנייה לפני מע"מ (₪)</span><input id="mBuy" type="number" placeholder="0"></div>
+        <div class="field-wrap"><span class="field-label">מחיר ללקוח (₪)</span><input id="mSell" type="number" placeholder="0"></div>
+      </div>
+      <div class="stat-line" id="mBuyVatPreview">מחיר קנייה כולל מע"מ (18%): ₪0</div>
+      <button class="action" onclick="addMaterial()">➕ הוסף חומר</button>
+    </div>
+    <div class="panel">
+      <h2>מלאי חומרים ורווחיות</h2>
+      <div id="materialsList"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+document.getElementById('mBuy').addEventListener('input', function(){
+  const v = Number(this.value) || 0;
+  document.getElementById('mBuyVatPreview').textContent = 'מחיר קנייה כולל מע"מ (18%): ₪' + (v*1.18).toLocaleString(undefined,{maximumFractionDigits:2});
+});
+</script>
+
+<div id="lightbox" onclick="this.classList.remove('show')"><img id="lightboxImg" src=""></div>
+<div class="toast" id="toast"></div>
+
+<div id="confirmOverlay" class="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="confirm-actions">
+      <button class="ghost" onclick="closeConfirm()">ביטול</button>
+      <button class="action" style="background:var(--danger);color:#fff;" onclick="confirmYes()">מחק</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let customers = [];
+let tasks = [];
+let finance = [];
+let oneoff = [];
+let materials = [];
+let expandedCustomerId = null;
+let pendingPhotos = {};
+let pendingMaterials = {};
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const todayStr = () => new Date().toISOString().slice(0,10);
+const VAT_RATE = 0.18;
+const withVat = (price) => Number(price||0) * (1 + VAT_RATE);
+
+const SEED_CUSTOMERS = [
+ {name:'יובל', phone:'050-5260404', address:'רחל ינאית 11', city:'באר שבע', poolType:'סקימרים פסיפס', price:450},
+ {name:'עמיר מיקיי', phone:'052-8873555', address:'בנימין מזר 93', city:'באר שבע', poolType:'PVC סקימרים', price:600},
+ {name:'יניב', phone:'052-2968777', address:'בלייברג 23', city:'באר שבע', poolType:'סקימרים פסיפס', price:400},
+ {name:'יהודה בן שימול', phone:'050-9556555', address:'שרירא גאון 3', city:'באר שבע', poolType:'גלישה', price:450},
+ {name:'אתי', phone:'053-7780832', address:'אורות ישראל 30', city:'באר שבע', poolType:'גלישה', price:450},
+ {name:'מלון צימרים', phone:'052-8885516', address:'גלית אנילביץ 9', city:'באר שבע', poolType:'סקימרים', price:400},
+ {name:'איתם', phone:'052-6550055', address:'שושן 17', city:'עומר', poolType:'גלישה', price:500},
+ {name:'גילי', phone:'0504424412', address:'סיתונית 6', city:'עומר', poolType:'סקימרים', price:400},
+ {name:'אירית', phone:'052-4505672', address:'תפוז 46', city:'עומר', poolType:'סקימרים פסיפס', price:400},
+ {name:'צחי בן גיגי', phone:'054-7776666', address:'החורשה 62', city:'עומר', poolType:'PVC סקימרים', price:350},
+ {name:'בתאל', phone:'050-6846096', address:'תפוח 85', city:'עומר', poolType:'גלישה', price:400},
+ {name:'יניב מימון', phone:'052-3122040', address:'צבעוני 6', city:'עומר', poolType:'סקימרים', price:400},
+ {name:'אופיר', phone:'052-4603602', address:'הגפן 45', city:'עומר', poolType:'PVC ימרים', price:400},
+ {name:'יוסי כהן', phone:'052-6502075', address:'הגפן 19', city:'עומר', poolType:'מפל נוי', price:600},
+ {name:'יוסי כהן / עליזה', phone:'050-7748555', address:'תפוז 38', city:'עומר', poolType:'גלישה', price:600},
+ {name:'גלית קופל', phone:'052-8885516', address:'צבעוני 25', city:'עומר', poolType:'סקימרים פסיפס', price:400},
+ {name:'מירב', phone:'050-6214560', address:'נחל זהור 11', city:'להבים', poolType:'גלישה', price:300},
+ {name:'ענבר', phone:'054-7880562', address:'נחל חצבה 6', city:'להבים', poolType:'סקימרים פסיפס', price:350},
+ {name:'דוד בובליל', phone:'052-8301749', address:'אודם 7', city:'להבים', poolType:'גלישה', price:600},
+ {name:'מירי/גבי', phone:'052-4708318', address:'שדרות חיטה 14', city:'להבים', poolType:'סקימרים פסיפס', price:400},
+];
+
+function seedIfEmpty(){
+  if(customers.length===0){
+    customers = SEED_CUSTOMERS.map(c => ({
+      id: uid(), name:c.name, phone:c.phone, address:c.address, city:c.city, poolType:c.poolType,
+      price:c.price, monthlyPrice:0, treatmentCount:0, materials:'', hasRobot:'לא', lastDate:'', nextDate:'',
+      notes:'', photosNote:'', gateCode:'', pumpType:'', horsepower:'', filterSize:'', pipeConnections:'',
+      poolVolume:'', sanitizerType:'', history:[]
+    }));
+    saveCustomers();
+  }
+}
+
+const storageAdapter = {
+  async get(key){
+    if(window.storage){
+      try{ return await window.storage.get(key); }catch(e){ /* fall through */ }
+    }
+    try{
+      const v = localStorage.getItem('tld_'+key);
+      return v!==null ? {value:v} : null;
+    }catch(e){ return null; }
+  },
+  async set(key, value){
+    if(window.storage){
+      try{ return await window.storage.set(key, value); }catch(e){ /* fall through */ }
+    }
+    try{
+      localStorage.setItem('tld_'+key, value);
+      return {value};
+    }catch(e){ console.error(e); return null; }
+  }
+};
+
+async function loadAll(){
+  try{ const c = await storageAdapter.get('customers'); customers = c? JSON.parse(c.value):[]; }catch(e){ customers=[]; }
+  try{ const t = await storageAdapter.get('tasks'); tasks = t? JSON.parse(t.value):[]; }catch(e){ tasks=[]; }
+  try{ const f = await storageAdapter.get('finance'); finance = f? JSON.parse(f.value):[]; }catch(e){ finance=[]; }
+  try{ const o = await storageAdapter.get('oneoff'); oneoff = o? JSON.parse(o.value):[]; }catch(e){ oneoff=[]; }
+  try{ const m = await storageAdapter.get('materials'); materials = m? JSON.parse(m.value):[]; }catch(e){ materials=[]; }
+  customers.forEach(c=>{
+    (c.history||[]).forEach(h=>{ if(!h.materialsUsed) h.materialsUsed=[]; if(h.paid===undefined) h.paid=true; });
+    if(c.gateCode===undefined) c.gateCode='';
+    if(c.monthlyPrice===undefined) c.monthlyPrice=0;
+    if(c.pumpType===undefined) c.pumpType='';
+    if(c.horsepower===undefined) c.horsepower='';
+    if(c.filterSize===undefined) c.filterSize='';
+    if(c.pipeConnections===undefined) c.pipeConnections='';
+    if(c.poolVolume===undefined) c.poolVolume='';
+    if(c.sanitizerType===undefined) c.sanitizerType='';
+  });
+  oneoff.forEach(o=>{ if(!o.materialsUsed) o.materialsUsed=[]; });
+  seedIfEmpty();
+  renderAll();
+  const urgent = getUrgentItems();
+  if(urgent.length>0){
+    showToast(`🔔 יש ${urgent.length} דברים דחופים היום/מחר`);
+    checkAndNotify();
+  }
+}
+
+async function saveCustomers(){ try{ await storageAdapter.set('customers', JSON.stringify(customers)); }catch(e){console.error(e);} }
+async function saveTasks(){ try{ await storageAdapter.set('tasks', JSON.stringify(tasks)); }catch(e){console.error(e);} }
+async function saveFinance(){ try{ await storageAdapter.set('finance', JSON.stringify(finance)); }catch(e){console.error(e);} }
+async function saveOneoff(){ try{ await storageAdapter.set('oneoff', JSON.stringify(oneoff)); }catch(e){console.error(e);} }
+async function saveMaterials(){ try{ await storageAdapter.set('materials', JSON.stringify(materials)); }catch(e){console.error(e);} }
+
+let toastTimer=null;
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type==='error' ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
+let confirmCallback = null;
+function showConfirm(msg, cb){
+  confirmCallback = cb;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function closeConfirm(){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  confirmCallback = null;
+}
+function confirmYes(){
+  const cb = confirmCallback;
+  closeConfirm();
+  if(cb) cb();
+}
+
+/* ---------- CALENDAR (ICS) EXPORT ---------- */
+function icsEscape(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function icsDateOnly(dateStr){ return dateStr.replace(/-/g,''); }
+function icsDateTime(dateStr, timeStr){ return dateStr.replace(/-/g,'') + 'T' + timeStr.replace(':','') + '00'; }
+
+function buildICS(events){
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Tehila LeDavid//Control Panel//HE\r\nCALSCALE:GREGORIAN\r\n';
+  const stamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  events.forEach(ev=>{
+    ics += 'BEGIN:VEVENT\r\nUID:'+uid()+'@tehila-ledavid\r\nDTSTAMP:'+stamp+'\r\n';
+    if(ev.time){
+      ics += 'DTSTART:'+icsDateTime(ev.date, ev.time)+'\r\nDURATION:PT1H\r\n';
+    }else{
+      const nd = new Date(ev.date); nd.setDate(nd.getDate()+1);
+      const ndStr = nd.toISOString().slice(0,10);
+      ics += 'DTSTART;VALUE=DATE:'+icsDateOnly(ev.date)+'\r\nDTEND;VALUE=DATE:'+icsDateOnly(ndStr)+'\r\n';
+    }
+    ics += 'SUMMARY:'+icsEscape(ev.title)+'\r\n';
+    if(ev.description) ics += 'DESCRIPTION:'+icsEscape(ev.description)+'\r\n';
+    if(ev.location) ics += 'LOCATION:'+icsEscape(ev.location)+'\r\n';
+    ics += 'END:VEVENT\r\n';
+  });
+  ics += 'END:VCALENDAR\r\n';
+  return ics;
+}
+
+function downloadICS(filename, content){
+  try{
+    const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(content);
+    const win = window.open(dataUri, '_blank');
+    if(!win){
+      window.location.href = dataUri;
+    }
+    showToast('📅 נפתח קובץ יומן - אשר הוספה');
+  }catch(e){
+    console.error(e);
+    showToast('שגיאה בייצוא ליומן', 'error');
+  }
+}
+
+function addCustomerEventToCalendar(id){
+  const c = customers.find(x=>x.id===id);
+  if(!c || !c.nextDate){ showToast('אין תאריך טיפול הבא מוגדר', 'error'); return; }
+  const ics = buildICS([{
+    title: 'טיפול בריכה - '+c.name,
+    date: c.nextDate,
+    description: (c.poolType?('סוג בריכה: '+c.poolType+'. '):'')+(c.phone?('טלפון: '+c.phone):''),
+    location: [c.address, c.city].filter(Boolean).join(', ')
+  }]);
+  downloadICS('טיפול-'+c.name+'.ics', ics);
+}
+
+function addUpcomingToCalendar(){
+  const now = new Date(); const in7 = new Date(); in7.setDate(now.getDate()+7);
+  const list = customers.filter(c=>{
+    if(!c.nextDate) return false;
+    const d = new Date(c.nextDate);
+    return d >= new Date(now.toDateString()) && d <= in7;
+  });
+  if(list.length===0){ showToast('אין טיפולים קרובים לייצוא', 'error'); return; }
+  const events = list.map(c=>({
+    title: 'טיפול בריכה - '+c.name,
+    date: c.nextDate,
+    description: (c.poolType?('סוג בריכה: '+c.poolType+'. '):'')+(c.phone?('טלפון: '+c.phone):''),
+    location: [c.address, c.city].filter(Boolean).join(', ')
+  }));
+  downloadICS('טיפולים-קרובים.ics', buildICS(events));
+}
+
+function addTaskToCalendar(id){
+  const t = tasks.find(x=>x.id===id);
+  if(!t || !t.date){ showToast('אין תאריך למשימה זו', 'error'); return; }
+  const cust = customers.find(c=>c.id===t.customerId);
+  const title = t.type + (cust? ' - '+cust.name : ' (תזכורת אישית)');
+  const ics = buildICS([{title, date:t.date, time:t.time||null, description:t.desc||''}]);
+  downloadICS('משימה.ics', ics);
+}
+
+/* ---------- URGENT REMINDERS ---------- */
+function dayDiff(dateStr){
+  const d = new Date(dateStr);
+  const now = new Date(new Date().toDateString());
+  d.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+
+function getUrgentItems(){
+  const items = [];
+  customers.forEach(c=>{
+    if(!c.nextDate) return;
+    const diff = dayDiff(c.nextDate);
+    if(diff <= 1){
+      items.push({
+        type:'customer', id:c.id, label:c.name,
+        meta:[c.city,c.address].filter(Boolean).join(', '),
+        date:c.nextDate, diff
+      });
+    }
+  });
+  tasks.forEach(t=>{
+    if(!t.date || t.status==='הושלם') return;
+    const diff = dayDiff(t.date);
+    if(diff <= 1){
+      const cust = customers.find(c=>c.id===t.customerId);
+      items.push({
+        type:'task', id:t.id, label: t.type + (cust? ' - '+cust.name : ' (תזכורת אישית)'),
+        meta: t.desc || '',
+        date:t.date, diff
+      });
+    }
+  });
+  return items.sort((a,b)=> a.diff-b.diff);
+}
+
+function urgentBadge(diff){
+  if(diff < 0) return '<span class="badge overdue">באיחור</span>';
+  if(diff === 0) return '<span class="badge today">היום</span>';
+  return '<span class="badge tomorrow">מחר</span>';
+}
+
+function renderUrgent(){
+  const el = document.getElementById('urgentList');
+  const items = getUrgentItems();
+  if(items.length===0){ el.innerHTML = '<div class="empty">אין דברים דחופים כרגע 🎉</div>'; return; }
+  el.innerHTML = items.map(it=>`
+    <div class="item"><div class="item-top">
+      <div><div class="item-title">${it.type==='task'?'📋':'🏊'} ${esc(it.label)}</div><div class="item-meta">${esc(it.meta)}</div></div>
+      ${urgentBadge(it.diff)}
+    </div></div>
+  `).join('');
+}
+
+function requestNotifPermission(){
+  if(!('Notification' in window)){ showToast('הדפדפן לא תומך בהתראות', 'error'); return; }
+  Notification.requestPermission().then(perm=>{
+    if(perm==='granted'){ showToast('🔔 התראות הופעלו'); checkAndNotify(); }
+    else{ showToast('ההתראות לא אושרו', 'error'); }
+  });
+}
+
+function checkAndNotify(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const items = getUrgentItems();
+  if(items.length===0) return;
+  try{
+    new Notification('תהילה לדוד - תזכורת', {
+      body: `יש ${items.length} דברים דחופים היום/מחר: ${items.slice(0,3).map(i=>i.label).join(', ')}`
+    });
+  }catch(e){ console.error(e); }
+}
+
+function renderAll(){
+  renderGauges();
+  renderUrgent();
+  renderUpcoming();
+  renderOwed();
+  renderOpenTasks();
+  renderCustomers();
+  renderCustomerSelects();
+  renderTasks();
+  renderOneoff();
+  renderFinance();
+  renderMaterials();
+}
+
+/* ---------- PHOTOS ---------- */
+function resizeImage(file, maxW=700, quality=0.6){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > maxW){ h = Math.round(h * (maxW/w)); w = maxW; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePhotoSelect(event, key){
+  const files = Array.from(event.target.files || []);
+  if(!pendingPhotos[key]) pendingPhotos[key] = [];
+  for(const f of files){
+    try{ const url = await resizeImage(f); pendingPhotos[key].push(url); }catch(e){ console.error(e); }
+  }
+  event.target.value = '';
+  renderThumbs(key);
+}
+
+function renderThumbs(key){
+  const el = document.getElementById('thumbs_'+key);
+  if(!el) return;
+  const arr = pendingPhotos[key] || [];
+  el.innerHTML = arr.map((src)=>`<img class="thumb" src="${src}" onclick="showPhoto('${src}')">`).join('');
+}
+
+function showPhoto(src){
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function photosHtml(photos){
+  if(!photos || photos.length===0) return '';
+  return `<div class="thumbs">${photos.map(src=>`<img class="thumb" src="${src}" onclick="showPhoto('${src}')">`).join('')}</div>`;
+}
+
+/* ---------- MATERIALS USE (per treatment / job) ---------- */
+function materialOptionsHtml(){
+  if(materials.length===0) return '<option value="">אין חומרים - הוסף בלשונית חומרים</option>';
+  return materials.map(m=>`<option value="${m.id}">${esc(m.name)} (₪${m.sellPrice||0})</option>`).join('');
+}
+
+function addMaterialUse(key){
+  const sel = document.getElementById('matSel_'+key);
+  const qtyEl = document.getElementById('matQty_'+key);
+  if(!sel || !sel.value){ showToast('אין חומר נבחר', 'error'); return; }
+  const qty = Number(qtyEl.value) || 1;
+  const m = materials.find(x=>x.id===sel.value);
+  if(!m) return;
+  if(!pendingMaterials[key]) pendingMaterials[key] = [];
+  pendingMaterials[key].push({materialId:m.id, name:m.name, qty, buyPrice:m.buyPrice||0, sellPrice:m.sellPrice||0});
+  qtyEl.value = '';
+  renderMaterialChips(key);
+}
+
+function removeMaterialUse(key, idx){
+  pendingMaterials[key].splice(idx,1);
+  renderMaterialChips(key);
+}
+
+function renderMaterialChips(key){
+  const el = document.getElementById('matChips_'+key);
+  if(!el) return;
+  const arr = pendingMaterials[key] || [];
+  el.innerHTML = arr.map((m,i)=>`<span class="chip">${esc(m.name)} x${m.qty}<button onclick="removeMaterialUse('${key}',${i})">✕</button></span>`).join('');
+}
+
+function refreshAllMaterialSelects(){
+  document.querySelectorAll('select[id^="matSel_"]').forEach(sel=>{
+    sel.innerHTML = materialOptionsHtml();
+  });
+}
+
+/* ---------- GAUGES ---------- */
+function renderGauges(){
+  const openCount = tasks.filter(t=>t.status!=='הושלם').length;
+  const now = new Date();
+  const in7 = new Date(); in7.setDate(now.getDate()+7);
+  const upcomingCount = customers.filter(c=>{
+    if(!c.nextDate) return false;
+    const d = new Date(c.nextDate);
+    return d >= new Date(now.toDateString()) && d <= in7;
+  }).length;
+
+  const ym = now.toISOString().slice(0,7);
+  const monthIncome = finance.filter(f=>f.type==='הכנסה' && f.date && f.date.startsWith(ym)).reduce((s,f)=>s+Number(f.amount||0),0);
+  const monthExpense = finance.filter(f=>f.type==='הוצאה' && f.date && f.date.startsWith(ym)).reduce((s,f)=>s+Number(f.amount||0),0);
+  const net = monthIncome - monthExpense;
+  const owedTotal = finance.filter(f=>f.type==='הכנסה' && f.paid===false).reduce((s,f)=>s+Number(f.amount||0),0);
+  const lowStock = materials.filter(m=> Number(m.stock) <= Number(m.minStock)).length;
+  const urgentCount = getUrgentItems().length;
+
+  const strip = document.getElementById('gaugeStrip');
+  strip.innerHTML = `
+    <div class="gauge-card"><div class="gauge-value ${urgentCount>0?'alert':''}">${urgentCount}</div><div class="gauge-label">דחוף היום/מחר</div></div>
+    <div class="gauge-card"><div class="gauge-value ${openCount>0?'brass':''}">${openCount}</div><div class="gauge-label">משימות פתוחות</div></div>
+    <div class="gauge-card"><div class="gauge-value">${upcomingCount}</div><div class="gauge-label">טיפולים ב-7 ימים</div></div>
+    <div class="gauge-card"><div class="gauge-value">${customers.length}</div><div class="gauge-label">לקוחות</div></div>
+    <div class="gauge-card"><div class="gauge-value ${net<0?'alert':''}">₪${net.toLocaleString()}</div><div class="gauge-label">נטו החודש</div></div>
+    <div class="gauge-card"><div class="gauge-value ${owedTotal>0?'alert':''}">₪${owedTotal.toLocaleString()}</div><div class="gauge-label">חובות פתוחים</div></div>
+    <div class="gauge-card"><div class="gauge-value ${lowStock>0?'alert':''}">${lowStock}</div><div class="gauge-label">חומרים בחוסר</div></div>
+  `;
+}
+
+/* ---------- DASHBOARD ---------- */
+function renderUpcoming(){
+  const now = new Date(); const in7 = new Date(); in7.setDate(now.getDate()+7);
+  const list = customers.filter(c=>{
+      if(!c.nextDate) return false;
+      const d = new Date(c.nextDate);
+      return d >= new Date(now.toDateString()) && d <= in7;
+    }).sort((a,b)=> new Date(a.nextDate)-new Date(b.nextDate));
+  const el = document.getElementById('upcomingList');
+  if(list.length===0){ el.innerHTML = '<div class="empty">אין טיפולים מתוכננים בשבוע הקרוב</div>'; return; }
+  el.innerHTML = list.map(c=>`
+    <div class="item"><div class="item-top">
+      <div><div class="item-title">${esc(c.name)}</div><div class="item-meta">${esc(c.city||'')} · ${esc(c.address||'')}</div></div>
+      <span class="badge progress">${formatDate(c.nextDate)}</span>
+    </div></div>`).join('');
+}
+
+function renderOwed(){
+  const unpaid = finance.filter(f=>f.type==='הכנסה' && f.paid===false);
+  const el = document.getElementById('owedList');
+  if(unpaid.length===0){ el.innerHTML = '<div class="empty">אין חובות פתוחים כרגע 🎉</div>'; return; }
+  const sorted = [...unpaid].sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));
+  el.innerHTML = sorted.map(f=>{
+    const cust = customers.find(c=>c.id===f.customerId);
+    const label = cust ? cust.name : (f.desc || 'לקוח מזדמן');
+    return `<div class="item"><div class="item-top">
+      <div><div class="item-title">${esc(label)}</div><div class="item-meta">${formatDate(f.date)}${f.desc? ' · '+esc(f.desc):''}</div></div>
+      <span class="badge unpaid">₪${Number(f.amount).toLocaleString()}</span>
+    </div>
+    <div class="item-actions"><button class="ghost paid-toggle" onclick="markFinancePaid('${f.id}')">✔ סמן כשולם</button></div>
+    </div>`;
+  }).join('');
+}
+
+function markFinancePaid(id){
+  const f = finance.find(x=>x.id===id);
+  if(f){
+    f.paid = true; saveFinance();
+    if(f.source==='oneoff' && f.jobId){ const j = oneoff.find(o=>o.id===f.jobId); if(j) j.paid = true; saveOneoff(); }
+    if(f.source==='treatment' && f.entryId && f.customerId){
+      const c = customers.find(x=>x.id===f.customerId);
+      const h = c && (c.history||[]).find(x=>x.id===f.entryId);
+      if(h){ h.paid = true; saveCustomers(); }
+    }
+    showToast('✓ סומן כשולם');
+    renderAll();
+  }
+}
+
+function renderOpenTasks(){
+  const list = tasks.filter(t=>t.status!=='הושלם').sort((a,b)=> new Date(a.date||0)-new Date(b.date||0));
+  const el = document.getElementById('openTasksList');
+  if(list.length===0){ el.innerHTML = '<div class="empty">אין משימות פתוחות כרגע</div>'; return; }
+  el.innerHTML = list.slice(0,8).map(t=>{
+    const cust = customers.find(c=>c.id===t.customerId);
+    const who = cust ? '— '+esc(cust.name) : '🔔 תזכורת אישית';
+    return `<div class="item"><div class="item-top">
+      <div><div class="item-title">${esc(t.type)} ${who}</div>
+      <div class="item-meta">${esc(t.desc||'')}${t.date? ' · '+formatDate(t.date):''}${t.time? ' '+t.time:''}</div></div>
+      <span class="badge ${t.status==='בטיפול'?'progress':'open'}">${t.status}</span>
+    </div></div>`;
+  }).join('');
+}
+
+/* ---------- CUSTOMERS ---------- */
+function addCustomer(){
+  const name = document.getElementById('cName').value.trim();
+  if(!name){ showToast('יש להזין שם לקוח', 'error'); return; }
+  const newCust = {
+    id: uid(), name,
+    phone: document.getElementById('cPhone').value.trim(),
+    address: document.getElementById('cAddress').value.trim(),
+    city: document.getElementById('cCity').value.trim(),
+    poolType: document.getElementById('cPoolType').value.trim(),
+    price: Number(document.getElementById('cPrice').value) || 0,
+    monthlyPrice: 0,
+    treatmentCount: 0,
+    materials: document.getElementById('cMaterials').value.trim(),
+    hasRobot: document.getElementById('cRobot').value,
+    lastDate: '', nextDate: document.getElementById('cNextDate').value,
+    notes: document.getElementById('cNotes').value.trim(),
+    photosNote: '', gateCode:'', pumpType:'', horsepower:'', filterSize:'', pipeConnections:'',
+    poolVolume:'', sanitizerType:'', history: []
+  };
+  customers.push(newCust);
+  ['cName','cPhone','cAddress','cCity','cPoolType','cPrice','cNextDate','cMaterials','cNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cRobot').value='לא';
+  saveCustomers();
+  showToast('✓ לקוח נוסף');
+  renderAll();
+  if(newCust.nextDate){ addCustomerEventToCalendar(newCust.id); }
+}
+
+function deleteCustomer(id){
+  showConfirm('למחוק את הלקוח? פעולה זו אינה הפיכה.', ()=>{
+    customers = customers.filter(c=>c.id!==id);
+    finance = finance.filter(f=>f.customerId!==id);
+    saveCustomers();
+    saveFinance();
+    showToast('🗑 הלקוח נמחק');
+    renderAll();
+  });
+}
+
+function toggleDetail(id){
+  expandedCustomerId = (expandedCustomerId===id) ? null : id;
+  renderCustomers();
+}
+
+function updateCustomerField(id, field, value){
+  const c = customers.find(x=>x.id===id);
+  if(!c) return;
+  c[field] = (field==='price' || field==='treatmentCount' || field==='monthlyPrice') ? (Number(value)||0) : value;
+  saveCustomers();
+  showToast('✓ נשמר');
+  renderGauges();
+  renderCustomers();
+  renderCustomerSelects();
+  if(field==='nextDate' && value){
+    addCustomerEventToCalendar(id);
+  }
+}
+
+function addTreatmentHistory(id){
+  const c = customers.find(x=>x.id===id);
+  if(!c) return;
+  const dateEl = document.getElementById('hDate_'+id);
+  const descEl = document.getElementById('hDesc_'+id);
+  const priceEl = document.getElementById('hPrice_'+id);
+  const paidEl = document.getElementById('hPaid_'+id);
+  const date = dateEl.value || todayStr();
+  const desc = descEl.value.trim();
+  const price = Number(priceEl.value) || c.price || 0;
+  const paid = paidEl.checked;
+  const photos = pendingPhotos['cust_'+id] || [];
+  const key = 'cust_'+id;
+  const matsUsed = pendingMaterials[key] || [];
+
+  const entryId = uid();
+  c.history = c.history || [];
+  c.history.unshift({id: entryId, date, desc, price, paid, photos, materialsUsed: matsUsed});
+  c.treatmentCount = (c.treatmentCount||0) + 1;
+  c.lastDate = date;
+
+  finance.push({id: uid(), type:'הכנסה', amount:price, date, customerId:id, desc: desc || ('טיפול - '+c.name), paid, source:'treatment', entryId});
+
+  let sellTotal=0, buyTotal=0;
+  matsUsed.forEach(m=>{
+    const mat = materials.find(x=>x.id===m.materialId);
+    if(mat){ mat.stock = Math.max(0, Number(mat.stock||0) - m.qty); }
+    sellTotal += m.qty * m.sellPrice;
+    buyTotal += m.qty * withVat(m.buyPrice);
+  });
+  if(sellTotal>0) finance.push({id: uid(), type:'הכנסה', amount:sellTotal, date, customerId:id, desc:'חומרים - '+c.name, paid, source:'materials', entryId});
+  if(buyTotal>0) finance.push({id: uid(), type:'הוצאה', amount:buyTotal, date, customerId:id, desc:'עלות חומרים - '+c.name, paid:true, source:'materials-cost', entryId});
+
+  dateEl.value=''; descEl.value=''; priceEl.value=''; paidEl.checked = true;
+  pendingPhotos[key] = [];
+  pendingMaterials[key] = [];
+  saveCustomers();
+  saveFinance();
+  saveMaterials();
+  showToast('✓ טיפול נוסף');
+  renderAll();
+}
+
+function deleteHistoryEntry(custId, histId){
+  showConfirm('למחוק את הטיפול מההיסטוריה?', ()=>{
+    const c = customers.find(x=>x.id===custId);
+    if(!c) return;
+    c.history = (c.history||[]).filter(h=>h.id!==histId);
+    finance = finance.filter(f=> f.entryId!==histId);
+    saveCustomers();
+    saveFinance();
+    showToast('🗑 נמחק');
+    renderAll();
+  });
+}
+
+function customerMaterialsStats(c){
+  let sell=0, buy=0, qty=0;
+  (c.history||[]).forEach(h=>{
+    (h.materialsUsed||[]).forEach(m=>{
+      sell += m.qty*m.sellPrice; buy += m.qty*withVat(m.buyPrice); qty += m.qty;
+    });
+  });
+  return {sell, buy, qty, profit: sell-buy};
+}
+
+function renderCustomers(){
+  const el = document.getElementById('customerList');
+  const q = (document.getElementById('custSearch')?.value || '').trim().toLowerCase();
+  let list = customers;
+  if(q){
+    list = customers.filter(c =>
+      (c.name||'').toLowerCase().includes(q) || (c.city||'').toLowerCase().includes(q) ||
+      (c.address||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q)
+    );
+  }
+  const sortBy = document.getElementById('custSort')?.value || 'name';
+  list = [...list].sort((a,b)=>{
+    if(sortBy==='city') return (a.city||'').localeCompare(b.city||'', 'he');
+    if(sortBy==='next'){
+      if(!a.nextDate && !b.nextDate) return 0;
+      if(!a.nextDate) return 1;
+      if(!b.nextDate) return -1;
+      return new Date(a.nextDate) - new Date(b.nextDate);
+    }
+    return (a.name||'').localeCompare(b.name||'', 'he');
+  });
+  if(list.length===0){ el.innerHTML = '<div class="empty">לא נמצאו לקוחות</div>'; return; }
+
+  el.innerHTML = list.map(c=>{
+    const isOpen = expandedCustomerId===c.id;
+    const key = 'cust_'+c.id;
+    const mStats = customerMaterialsStats(c);
+    const historyHtml = (c.history && c.history.length)
+      ? c.history.map(h=>{
+        const matLine = (h.materialsUsed && h.materialsUsed.length)
+          ? '<div>🧪 '+h.materialsUsed.map(m=>esc(m.name)+' x'+m.qty).join(', ')+'</div>' : '';
+        return `
+        <div class="hist-entry">
+          <div class="h-top"><span>${formatDate(h.date)}</span><span>₪${Number(h.price||0).toLocaleString()} · ${h.paid===false?'<span style="color:var(--danger)">לא שולם</span>':'שולם'}</span></div>
+          ${h.desc? '<div>'+esc(h.desc)+'</div>':''}
+          ${matLine}
+          ${photosHtml(h.photos)}
+          <div class="item-actions"><button class="ghost danger small" onclick="deleteHistoryEntry('${c.id}','${h.id}')">מחיקה</button></div>
+        </div>`;
+      }).join('')
+      : '<div class="empty" style="padding:10px 0;">אין עדיין טיפולים בהיסטוריה</div>';
+
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(c.name)}</div>
+          <div class="item-meta">
+            ${c.phone? '📞 '+esc(c.phone)+'<br>':''}
+            ${c.address||c.city? '📍 '+esc(c.address||'')+(c.city? ', '+esc(c.city):'')+'<br>':''}
+            🏊 ${esc(c.poolType||'לא הוזן')} · 💰 ₪${Number(c.price||0).toLocaleString()}${c.monthlyPrice? ' · 💳 ₪'+Number(c.monthlyPrice).toLocaleString()+'/חודש':''}
+            ${c.nextDate? '<br>🗓️ טיפול הבא: '+formatDate(c.nextDate):''}
+          </div>
+        </div>
+        <span class="badge ${c.hasRobot==='כן'?'robot':'norobot'}">🤖 ${c.hasRobot==='כן'?'רובוט':'ללא רובוט'}</span>
+      </div>
+      <div class="item-actions">
+        <button class="ghost ${isOpen?'active-toggle':''}" onclick="toggleDetail('${c.id}')">${isOpen?'סגור פרטים':'פרטים מלאים'}</button>
+        ${c.nextDate? '<button class="calbtn" onclick="addCustomerEventToCalendar(\''+c.id+'\')">📅 ליומן</button>' : ''}
+        <button class="ghost danger" onclick="deleteCustomer('${c.id}')">מחיקה</button>
+      </div>
+
+      <div class="detail-box ${isOpen?'open':''}">
+        <div class="detail-grid">
+          <div class="field-wrap"><span class="field-label">👤 שם</span><input value="${esc(c.name||'')}" onchange="updateCustomerField('${c.id}','name',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">📞 טלפון</span><input value="${esc(c.phone||'')}" onchange="updateCustomerField('${c.id}','phone',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">📍 כתובת</span><input value="${esc(c.address||'')}" onchange="updateCustomerField('${c.id}','address',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🏙️ עיר</span><input value="${esc(c.city||'')}" onchange="updateCustomerField('${c.id}','city',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🔐 קוד שער</span><input value="${esc(c.gateCode||'')}" placeholder="למשל 1234#" onchange="updateCustomerField('${c.id}','gateCode',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🔄 כמות טיפולים</span><input type="number" value="${c.treatmentCount||0}" onchange="updateCustomerField('${c.id}','treatmentCount',this.value)"></div>
+        </div>
+
+        <h2 style="font-size:13px;">📅 תאריכים ועלויות</h2>
+        <div class="detail-grid">
+          <div class="field-wrap"><span class="field-label">📅 טיפול קודם</span><input type="date" value="${c.lastDate||''}" onchange="updateCustomerField('${c.id}','lastDate',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">📅 טיפול הבא</span><input type="date" value="${c.nextDate||''}" onchange="updateCustomerField('${c.id}','nextDate',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">💰 עלות טיפול בודד (₪)</span><input type="number" value="${c.price||0}" onchange="updateCustomerField('${c.id}','price',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">💳 עלות חודשית קבועה (₪)</span><input type="number" value="${c.monthlyPrice||0}" placeholder="0 = לא רלוונטי" onchange="updateCustomerField('${c.id}','monthlyPrice',this.value)"></div>
+        </div>
+
+        <h2 style="font-size:13px;">🔧 פרטי ציוד הבריכה</h2>
+        <div class="detail-grid">
+          <div class="field-wrap"><span class="field-label">🏊 סוג בריכה</span><input value="${esc(c.poolType||'')}" onchange="updateCustomerField('${c.id}','poolType',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">📏 נפח בריכה (מ"ק)</span><input value="${esc(c.poolVolume||'')}" placeholder="למשל 45" onchange="updateCustomerField('${c.id}','poolVolume',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">⚙️ סוג משאבה</span><input value="${esc(c.pumpType||'')}" placeholder="יצרן ודגם" onchange="updateCustomerField('${c.id}','pumpType',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🐎 כוח סוס (HP)</span><input value="${esc(c.horsepower||'')}" placeholder="למשל 1.5" onchange="updateCustomerField('${c.id}','horsepower',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🧰 גודל פילטר</span><input value="${esc(c.filterSize||'')}" placeholder="קוטר / נפח חול" onchange="updateCustomerField('${c.id}','filterSize',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🔗 חיבורי צנרת</span><input value="${esc(c.pipeConnections||'')}" placeholder="קוטר וסוג חיבור" onchange="updateCustomerField('${c.id}','pipeConnections',this.value)"></div>
+          <div class="field-wrap"><span class="field-label">🧴 סוג חיטוי</span>
+            <select onchange="updateCustomerField('${c.id}','sanitizerType',this.value)">
+              <option value="">— לא הוגדר —</option>
+              <option value="כלור" ${c.sanitizerType==='כלור'?'selected':''}>כלור</option>
+              <option value="מלח" ${c.sanitizerType==='מלח'?'selected':''}>מלח</option>
+              <option value="ברום" ${c.sanitizerType==='ברום'?'selected':''}>ברום</option>
+              <option value="אחר" ${c.sanitizerType==='אחר'?'selected':''}>אחר</option>
+            </select>
+          </div>
+          <div class="field-wrap"><span class="field-label">🤖 רובוט</span>
+            <select onchange="updateCustomerField('${c.id}','hasRobot',this.value)">
+              <option value="לא" ${c.hasRobot!=='כן'?'selected':''}>לא</option>
+              <option value="כן" ${c.hasRobot==='כן'?'selected':''}>כן</option>
+            </select>
+          </div>
+          <div class="field-wrap full"><span class="field-label">🧪 חומרים נדרשים</span><input value="${esc(c.materials||'')}" placeholder="כלור, מלח, pH מינוס..." onchange="updateCustomerField('${c.id}','materials',this.value)"></div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="field-wrap full"><span class="field-label">📸 תמונות (הערה)</span><input value="${esc(c.photosNote||'')}" placeholder="קישור לתיקיית תמונות / הערה" onchange="updateCustomerField('${c.id}','photosNote',this.value)"></div>
+          <div class="field-wrap full"><span class="field-label">📝 הערות</span><textarea onchange="updateCustomerField('${c.id}','notes',this.value)">${esc(c.notes||'')}</textarea></div>
+        </div>
+
+        <div class="stat-line">🧪 חומרים שנמכרו ללקוח: ${mStats.qty} יח' · הכנסה ₪${mStats.sell.toLocaleString()} · עלות (כולל מע"מ) ₪${mStats.buy.toLocaleString(undefined,{maximumFractionDigits:2})} · רווח ₪${mStats.profit.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+
+        <h2 style="font-size:13px;margin-top:12px;">📚 היסטוריית טיפולים</h2>
+        ${historyHtml}
+
+        <div class="row" style="margin-top:8px;">
+          <div class="field-wrap"><span class="field-label">תאריך טיפול</span><input type="date" id="hDate_${c.id}"></div>
+          <div class="field-wrap"><span class="field-label">עלות (₪)</span><input type="number" id="hPrice_${c.id}" placeholder="${c.price||0}"></div>
+        </div>
+        <div class="row"><input id="hDesc_${c.id}" placeholder="מה בוצע בטיפול"></div>
+        <div class="row"><label class="check"><input type="checkbox" id="hPaid_${c.id}" checked> שולם</label></div>
+
+        <div class="row">
+          <div class="field-wrap"><span class="field-label">🧪 חומר בשימוש</span><select id="matSel_${key}">${materialOptionsHtml()}</select></div>
+          <div class="field-wrap" style="max-width:90px;"><span class="field-label">כמות</span><input type="number" id="matQty_${key}" placeholder="1"></div>
+        </div>
+        <button class="ghost" onclick="addMaterialUse('${key}')">➕ הוסף חומר לטיפול</button>
+        <div id="matChips_${key}"></div>
+
+        <div class="photo-btns">
+          <label class="photo-btn">📷 צלם תמונה<input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event,'${key}')"></label>
+          <label class="photo-btn">🖼 מהגלריה<input type="file" accept="image/*" multiple onchange="handlePhotoSelect(event,'${key}')"></label>
+        </div>
+        <div class="thumbs" id="thumbs_${key}"></div>
+
+        <button class="action" style="margin-top:10px;" onclick="addTreatmentHistory('${c.id}')">➕ הוסף טיפול להיסטוריה</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+
+  if(expandedCustomerId){
+    renderThumbs('cust_'+expandedCustomerId);
+    renderMaterialChips('cust_'+expandedCustomerId);
+  }
+}
+
+function renderCustomerSelects(){
+  const opts = customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const tSel = document.getElementById('tCustomer');
+  tSel.innerHTML = '<option value="">— ללא לקוח (תזכורת אישית) —</option>' + opts;
+  const fSel = document.getElementById('fCustomer');
+  fSel.innerHTML = '<option value="">— ללא —</option>' + opts;
+}
+
+/* ---------- ONE-OFF JOBS ---------- */
+function addOneOff(){
+  const name = document.getElementById('oName').value.trim();
+  const amount = Number(document.getElementById('oAmount').value);
+  if(!name){ showToast('יש להזין שם לקוח', 'error'); return; }
+  if(!amount || amount<=0){ showToast('יש להזין סכום תקין', 'error'); return; }
+  const date = document.getElementById('oDate').value || todayStr();
+  const paid = document.getElementById('oPaid').checked;
+  const photos = pendingPhotos['oneoff_new'] || [];
+  const matsUsed = pendingMaterials['oneoff_new'] || [];
+  const jobId = uid();
+  const descVal = document.getElementById('oDesc').value.trim();
+
+  oneoff.push({
+    id: jobId, name, phone: document.getElementById('oPhone').value.trim(),
+    address: document.getElementById('oAddress').value.trim(),
+    desc: descVal, amount, date, paid, photos, materialsUsed: matsUsed
+  });
+
+  finance.push({id: uid(), type:'הכנסה', amount, date, customerId:null, desc:'מזדמן: '+name+(descVal? ' - '+descVal:''), paid, source:'oneoff', jobId});
+
+  let sellTotal=0, buyTotal=0;
+  matsUsed.forEach(m=>{
+    const mat = materials.find(x=>x.id===m.materialId);
+    if(mat){ mat.stock = Math.max(0, Number(mat.stock||0) - m.qty); }
+    sellTotal += m.qty * m.sellPrice;
+    buyTotal += m.qty * withVat(m.buyPrice);
+  });
+  if(sellTotal>0) finance.push({id: uid(), type:'הכנסה', amount:sellTotal, date, customerId:null, desc:'חומרים - '+name, paid, source:'materials', jobId});
+  if(buyTotal>0) finance.push({id: uid(), type:'הוצאה', amount:buyTotal, date, customerId:null, desc:'עלות חומרים - '+name, paid:true, source:'materials-cost', jobId});
+
+  ['oName','oPhone','oAddress','oDesc','oAmount'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('oDate').value='';
+  document.getElementById('oPaid').checked = true;
+  pendingPhotos['oneoff_new'] = [];
+  pendingMaterials['oneoff_new'] = [];
+  renderThumbs('oneoff_new');
+  renderMaterialChips('oneoff_new');
+  saveOneoff();
+  saveFinance();
+  saveMaterials();
+  showToast('✓ עבודה נוספה');
+  renderAll();
+}
+
+function markOneoffPaid(id){
+  const o = oneoff.find(x=>x.id===id);
+  if(!o) return;
+  o.paid = true;
+  finance.filter(f=>f.jobId===id).forEach(f=> f.paid = true);
+  saveOneoff();
+  saveFinance();
+  showToast('✓ סומן כשולם');
+  renderAll();
+}
+
+function deleteOneOff(id){
+  showConfirm('למחוק את העבודה? פעולה זו אינה הפיכה.', ()=>{
+    oneoff = oneoff.filter(o=>o.id!==id);
+    finance = finance.filter(f=> f.jobId!==id);
+    saveOneoff();
+    saveFinance();
+    showToast('🗑 העבודה נמחקה');
+    renderAll();
+  });
+}
+
+function renderOneoff(){
+  const el = document.getElementById('oneoffList');
+  if(oneoff.length===0){ el.innerHTML = '<div class="empty">עדיין לא נוספו עבודות מזדמנות</div>'; return; }
+  const sorted = [...oneoff].sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));
+  el.innerHTML = sorted.map(o=>{
+    const matLine = (o.materialsUsed && o.materialsUsed.length)
+      ? '<div>🧪 '+o.materialsUsed.map(m=>esc(m.name)+' x'+m.qty).join(', ')+'</div>' : '';
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(o.name)}</div>
+          <div class="item-meta">
+            ${o.phone? '📞 '+esc(o.phone)+'<br>':''}
+            ${o.address? '📍 '+esc(o.address)+'<br>':''}
+            ${formatDate(o.date)}${o.desc? ' · '+esc(o.desc):''}
+          </div>
+          ${matLine}
+          ${photosHtml(o.photos)}
+        </div>
+        <span class="badge ${o.paid===false?'unpaid':'paid'}">₪${Number(o.amount).toLocaleString()}</span>
+      </div>
+      <div class="item-actions">
+        ${o.paid===false? '<button class="ghost paid-toggle" onclick="markOneoffPaid(\''+o.id+'\')">✔ סמן כשולם</button>':''}
+        <button class="ghost danger" onclick="deleteOneOff('${o.id}')">מחיקה</button>
+      </div>
+    </div>
+  `;}).join('');
+}
+
+/* ---------- TASKS ---------- */
+function addTask(){
+  const customerId = document.getElementById('tCustomer').value || null;
+  const date = document.getElementById('tDate').value || todayStr();
+  const newTask = {
+    id: uid(), customerId,
+    type: document.getElementById('tType').value,
+    date,
+    time: document.getElementById('tTime').value || '',
+    desc: document.getElementById('tDesc').value.trim(),
+    status: 'פתוח'
+  };
+  tasks.push(newTask);
+  document.getElementById('tDesc').value='';
+  document.getElementById('tDate').value='';
+  document.getElementById('tTime').value='';
+  saveTasks();
+  showToast('✓ משימה נוספה');
+  renderAll();
+  if(newTask.date){ addTaskToCalendar(newTask.id); }
+}
+
+function updateTaskStatus(id, status){
+  const t = tasks.find(x=>x.id===id);
+  if(t){ t.status = status; saveTasks(); showToast('✓ עודכן'); renderAll(); }
+}
+
+function deleteTask(id){
+  showConfirm('למחוק את המשימה?', ()=>{
+    tasks = tasks.filter(t=>t.id!==id);
+    saveTasks();
+    showToast('🗑 נמחק');
+    renderAll();
+  });
+}
+
+function renderTasks(){
+  const el = document.getElementById('taskList');
+  if(tasks.length===0){ el.innerHTML = '<div class="empty">עדיין לא נוספו משימות</div>'; return; }
+  const sorted = [...tasks].sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));
+  el.innerHTML = sorted.map(t=>{
+    const cust = customers.find(c=>c.id===t.customerId);
+    const who = cust ? '— '+esc(cust.name) : '🔔 תזכורת אישית';
+    const badgeClass = t.status==='הושלם'?'done':(t.status==='בטיפול'?'progress':'open');
+    return `<div class="item"><div class="item-top">
+      <div><div class="item-title">${esc(t.type)} ${who}</div>
+      <div class="item-meta">${t.date? formatDate(t.date)+' · ':''}${t.time? t.time+' · ':''}${esc(t.desc||'')}</div></div>
+      <span class="badge ${badgeClass}">${t.status}</span>
+    </div>
+    <div class="item-actions">
+      <select class="status-select" onchange="updateTaskStatus('${t.id}', this.value)">
+        <option value="פתוח" ${t.status==='פתוח'?'selected':''}>פתוח</option>
+        <option value="בטיפול" ${t.status==='בטיפול'?'selected':''}>בטיפול</option>
+        <option value="הושלם" ${t.status==='הושלם'?'selected':''}>הושלם</option>
+      </select>
+      ${t.date? '<button class="calbtn" onclick="addTaskToCalendar(\''+t.id+'\')">📅 ליומן</button>':''}
+      <button class="ghost danger" onclick="deleteTask('${t.id}')">מחיקה</button>
+    </div></div>`;
+  }).join('');
+}
+
+/* ---------- FINANCE ---------- */
+function addFinance(){
+  const amount = Number(document.getElementById('fAmount').value);
+  if(!amount || amount<=0){ showToast('יש להזין סכום תקין', 'error'); return; }
+  const type = document.getElementById('fType').value;
+  finance.push({
+    id: uid(), type, amount,
+    date: document.getElementById('fDate').value || todayStr(),
+    customerId: document.getElementById('fCustomer').value || null,
+    desc: document.getElementById('fDesc').value.trim(),
+    paid: type==='הוצאה' ? true : document.getElementById('fPaid').checked,
+    source:'manual'
+  });
+  document.getElementById('fAmount').value='';
+  document.getElementById('fDesc').value='';
+  document.getElementById('fDate').value='';
+  document.getElementById('fPaid').checked = true;
+  saveFinance();
+  showToast('✓ תנועה נוספה');
+  renderAll();
+}
+
+function deleteFinance(id){
+  showConfirm('למחוק את התנועה הכספית?', ()=>{
+    finance = finance.filter(f=>f.id!==id);
+    saveFinance();
+    showToast('🗑 נמחק');
+    renderAll();
+  });
+}
+
+function renderFinance(){
+  const now = new Date();
+  const ym = now.toISOString().slice(0,7);
+  const monthItems = finance.filter(f=>f.date && f.date.startsWith(ym));
+  const income = monthItems.filter(f=>f.type==='הכנסה').reduce((s,f)=>s+Number(f.amount),0);
+  const expense = monthItems.filter(f=>f.type==='הוצאה').reduce((s,f)=>s+Number(f.amount),0);
+
+  document.getElementById('financeSummary').innerHTML = `
+    <div class="row">
+      <div class="item" style="flex:1;text-align:center;"><div class="item-meta">הכנסות</div><div class="gauge-value" style="font-size:22px;">₪${income.toLocaleString()}</div></div>
+      <div class="item" style="flex:1;text-align:center;"><div class="item-meta">הוצאות</div><div class="gauge-value alert" style="font-size:22px;">₪${expense.toLocaleString()}</div></div>
+      <div class="item" style="flex:1;text-align:center;"><div class="item-meta">נטו</div><div class="gauge-value ${(income-expense)<0?'alert':''}" style="font-size:22px;">₪${(income-expense).toLocaleString()}</div></div>
+    </div>
+  `;
+
+  const el = document.getElementById('financeList');
+  if(finance.length===0){ el.innerHTML = '<div class="empty">עדיין לא נוספו תנועות כספיות</div>'; return; }
+  const sorted = [...finance].sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));
+  el.innerHTML = sorted.map(f=>{
+    const cust = customers.find(c=>c.id===f.customerId);
+    return `<div class="item"><div class="item-top">
+      <div>
+        <div class="item-title">${f.type==='הכנסה'?'+':'-'} ₪${Number(f.amount).toLocaleString()} ${cust?'— '+esc(cust.name):''}</div>
+        <div class="item-meta">${formatDate(f.date)}${f.desc? ' · '+esc(f.desc):''}</div>
+      </div>
+      <span class="badge ${f.type==='הכנסה'?'income':'expense'}">${f.type}${f.type==='הכנסה'&&f.paid===false?' · לא שולם':''}</span>
+    </div>
+    <div class="item-actions">
+      ${f.type==='הכנסה'&&f.paid===false? '<button class="ghost paid-toggle" onclick="markFinancePaid(\''+f.id+'\')">✔ סמן כשולם</button>':''}
+      <button class="ghost danger" onclick="deleteFinance('${f.id}')">מחיקה</button>
+    </div></div>`;
+  }).join('');
+}
+
+/* ---------- MONTHLY REPORT ---------- */
+function buildMonthlyReport(){
+  const now = new Date();
+  const ym = now.toISOString().slice(0,7);
+  const monthName = now.toLocaleDateString('he-IL', {month:'long', year:'numeric'});
+  const monthFinance = finance.filter(f=>f.date && f.date.startsWith(ym));
+  const income = monthFinance.filter(f=>f.type==='הכנסה').reduce((s,f)=>s+Number(f.amount),0);
+  const expense = monthFinance.filter(f=>f.type==='הוצאה').reduce((s,f)=>s+Number(f.amount),0);
+  const treatmentsThisMonth = customers.reduce((s,c)=> s + (c.history||[]).filter(h=>h.date && h.date.startsWith(ym)).length, 0);
+  const oneoffThisMonth = oneoff.filter(o=>o.date && o.date.startsWith(ym));
+  const unpaid = finance.filter(f=>f.type==='הכנסה' && f.paid===false);
+  const unpaidTotal = unpaid.reduce((s,f)=>s+Number(f.amount),0);
+  const lowStock = materials.filter(m=> Number(m.stock) <= Number(m.minStock));
+  const matIncome = monthFinance.filter(f=>f.source==='materials').reduce((s,f)=>s+Number(f.amount),0);
+  const matCost = monthFinance.filter(f=>f.source==='materials-cost').reduce((s,f)=>s+Number(f.amount),0);
+
+  let txt = `📊 דוח חודשי — ${monthName}\n`;
+  txt += `תהילה לדוד — אחזקה ופרויקטים\n`;
+  txt += `${'-'.repeat(28)}\n`;
+  txt += `👥 לקוחות קבועים: ${customers.length}\n`;
+  txt += `🔧 טיפולים שבוצעו החודש: ${treatmentsThisMonth}\n`;
+  txt += `⚡ עבודות מזדמנות החודש: ${oneoffThisMonth.length}\n`;
+  txt += `${'-'.repeat(28)}\n`;
+  txt += `💰 הכנסות: ₪${income.toLocaleString()}\n`;
+  txt += `💸 הוצאות: ₪${expense.toLocaleString()}\n`;
+  txt += `📈 נטו: ₪${(income-expense).toLocaleString()}\n`;
+  txt += `🧪 מכירת חומרים: ₪${matIncome.toLocaleString()} (עלות ₪${matCost.toLocaleString()}, רווח ₪${(matIncome-matCost).toLocaleString()})\n`;
+  txt += `${'-'.repeat(28)}\n`;
+  txt += `⏳ חובות פתוחים: ₪${unpaidTotal.toLocaleString()} (${unpaid.length} תשלומים)\n`;
+  if(lowStock.length){
+    txt += `${'-'.repeat(28)}\n🧪 חומרים בחוסר:\n`;
+    lowStock.forEach(m=> txt += `  • ${m.name}: ${m.stock} ${m.unit||''} (סף: ${m.minStock})\n`);
+  }
+
+  const wrap = document.getElementById('reportWrap');
+  wrap.innerHTML = `
+    <div class="report-box" id="reportText">${esc(txt)}</div>
+    <div class="row" style="margin-top:8px;">
+      <button class="ghost" onclick="copyReport()">📋 העתק דוח</button>
+    </div>
+  `;
+  wrap.dataset.raw = txt;
+}
+
+function copyReport(){
+  const wrap = document.getElementById('reportWrap');
+  const txt = wrap.dataset.raw || '';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=> showToast('📋 הועתק')).catch(()=> showToast('לא ניתן להעתיק אוטומטית', 'error'));
+  }else{
+    showToast('לא ניתן להעתיק אוטומטית בדפדפן זה', 'error');
+  }
+}
+
+/* ---------- MATERIALS ---------- */
+function addMaterial(){
+  const name = document.getElementById('mName').value.trim();
+  if(!name){ showToast('יש להזין שם חומר', 'error'); return; }
+  materials.push({
+    id: uid(), name, unit: document.getElementById('mUnit').value.trim(),
+    stock: Number(document.getElementById('mStock').value) || 0,
+    minStock: Number(document.getElementById('mMin').value) || 0,
+    buyPrice: Number(document.getElementById('mBuy').value) || 0,
+    sellPrice: Number(document.getElementById('mSell').value) || 0
+  });
+  ['mName','mUnit','mStock','mMin','mBuy','mSell'].forEach(id=>document.getElementById(id).value='');
+  saveMaterials();
+  showToast('✓ חומר נוסף');
+  renderAll();
+}
+
+function updateMaterialField(id, field, value){
+  const m = materials.find(x=>x.id===id);
+  if(!m) return;
+  const numeric = ['buyPrice','sellPrice','minStock'];
+  m[field] = numeric.includes(field) ? (Number(value)||0) : value;
+  saveMaterials();
+  showToast('✓ נשמר');
+  renderAll();
+}
+
+function adjustStock(id, delta){
+  const m = materials.find(x=>x.id===id);
+  if(!m) return;
+  m.stock = Math.max(0, Number(m.stock||0) + delta);
+  saveMaterials();
+  renderAll();
+}
+
+function deleteMaterial(id){
+  showConfirm('למחוק את החומר? פעולה זו אינה הפיכה.', ()=>{
+    materials = materials.filter(m=>m.id!==id);
+    saveMaterials();
+    showToast('🗑 נמחק');
+    renderAll();
+  });
+}
+
+function materialAggregateStats(matId){
+  let qty=0, sell=0, buy=0;
+  customers.forEach(c=> (c.history||[]).forEach(h=> (h.materialsUsed||[]).forEach(m=>{
+    if(m.materialId===matId){ qty+=m.qty; sell+=m.qty*m.sellPrice; buy+=m.qty*withVat(m.buyPrice); }
+  })));
+  oneoff.forEach(o=> (o.materialsUsed||[]).forEach(m=>{
+    if(m.materialId===matId){ qty+=m.qty; sell+=m.qty*m.sellPrice; buy+=m.qty*withVat(m.buyPrice); }
+  }));
+  return {qty, sell, buy, profit: sell-buy};
+}
+
+function renderMaterials(){
+  const el = document.getElementById('materialsList');
+  if(materials.length===0){ el.innerHTML = '<div class="empty">עדיין לא נוספו חומרים</div>'; return; }
+  el.innerHTML = materials.map(m=>{
+    const low = Number(m.stock) <= Number(m.minStock);
+    const stats = materialAggregateStats(m.id);
+    return `<div class="item">
+      <div class="item-top">
+        <div style="flex:1;">
+          <div class="item-title">${esc(m.name)}</div>
+        </div>
+        <span class="badge ${low?'low':'paid'}">${low? '⚠️ בחוסר':'תקין'}</span>
+      </div>
+      <div class="detail-grid" style="margin-top:8px;">
+        <div class="field-wrap"><span class="field-label">שם</span><input value="${esc(m.name)}" onchange="updateMaterialField('${m.id}','name',this.value)"></div>
+        <div class="field-wrap"><span class="field-label">יחידה</span><input value="${esc(m.unit||'')}" onchange="updateMaterialField('${m.id}','unit',this.value)"></div>
+        <div class="field-wrap"><span class="field-label">מחיר קנייה לפני מע"מ (₪)</span><input type="number" value="${m.buyPrice||0}" onchange="updateMaterialField('${m.id}','buyPrice',this.value)"></div>
+        <div class="field-wrap"><span class="field-label">מחיר ללקוח (₪)</span><input type="number" value="${m.sellPrice||0}" onchange="updateMaterialField('${m.id}','sellPrice',this.value)"></div>
+        <div class="field-wrap full"><span class="field-label">כולל מע"מ 18% (מחושב אוטומטית)</span><input value="₪${withVat(m.buyPrice).toLocaleString(undefined,{maximumFractionDigits:2})}" disabled></div>
+        <div class="field-wrap full"><span class="field-label">סף התראה</span><input type="number" value="${m.minStock||0}" onchange="updateMaterialField('${m.id}','minStock',this.value)"></div>
+      </div>
+      <div class="stat-line">נמכר סה"כ: ${stats.qty} יח' · הכנסה ₪${stats.sell.toLocaleString()} · רווח (כולל מע"מ בעלות) ₪${stats.profit.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+      <div class="item-actions" style="align-items:center;">
+        <div class="stock-adjust">
+          <button onclick="adjustStock('${m.id}',-1)">–</button>
+          <span class="stock-num">${m.stock}</span>
+          <button onclick="adjustStock('${m.id}',1)">+</button>
+        </div>
+        <button class="ghost danger" onclick="deleteMaterial('${m.id}')">מחיקה</button>
+      </div>
+    </div>`;
+  }).join('');
+  refreshAllMaterialSelects();
+}
+
+/* ---------- UTIL ---------- */
+function esc(s){
+  if(s==null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function formatDate(dstr){ if(!dstr) return ''; const d = new Date(dstr); return d.toLocaleDateString('he-IL', {day:'2-digit', month:'2-digit', year:'numeric'}); }
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main > section').forEach(s=>s.classList.add('section-hidden'));
+    document.getElementById('tab-'+btn.dataset.tab).classList.remove('section-hidden');
+    window.scrollTo(0,0);
+  });
+});
+
+loadAll();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.error('SW registration failed:', e));
+  });
+}
+</script>
+</body>
+</html>
